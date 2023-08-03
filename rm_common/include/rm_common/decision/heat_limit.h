@@ -165,17 +165,28 @@ public:
 
   void setCoolingHeatOfShooter(const rm_msgs::PowerHeatData data)
   {
-    if (type_ == "ID1_17MM")
+    if (is_enter_)
     {
-      shooter_cooling_heat_ = data.shooter_id_1_17_mm_cooling_heat;
+      if (type_ == "ID1_17MM")
+      {
+        shooter_cooling_heat_ = data.shooter_id_1_17_mm_cooling_heat;
+      }
+      else if (type_ == "ID2_17MM")
+      {
+        shooter_cooling_heat_ = data.shooter_id_2_17_mm_cooling_heat;
+      }
+      else if (type_ == "ID1_42MM")
+      {
+        shooter_cooling_heat_ = data.shooter_id_1_42_mm_cooling_heat;
+      }
     }
-    else if (type_ == "ID2_17MM")
+    if (!referee_is_online_)
     {
-      shooter_cooling_heat_ = data.shooter_id_2_17_mm_cooling_heat;
+      is_enter_ = false;
     }
-    else if (type_ == "ID1_42MM")
+    else
     {
-      shooter_cooling_heat_ = data.shooter_id_1_42_mm_cooling_heat;
+      is_enter_ = true;
     }
   }
 
@@ -297,6 +308,7 @@ private:
   std::string type_{};
   bool burst_flag_ = false;
   bool judge_ = true;
+  bool is_enter_ = true;
   bool is_shoot_ = false;
   double bullet_heat_, safe_shoot_frequency_{}, heat_coeff_{}, shoot_frequency_{}, low_shoot_frequency_{},
       high_shoot_frequency_{}, burst_shoot_frequency_{}, minimal_shoot_frequency_{}, left_friction_wheel_velocity_[1],
