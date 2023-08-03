@@ -79,6 +79,50 @@ public:
     MINIMAL = 3
   } ShootHz;
 
+  void UpdateIsShoot(const sensor_msgs::JointState::ConstPtr data)
+  {
+    for (unsigned int i = 0; i < data->name.size(); i++)
+    {
+      if (judge_)
+      {
+        if (data->name[i] == "left_friction_wheel_joint")
+        {
+          left_friction_wheel_velocity_[0] = data->velocity[i];
+        }
+        if (data->name[i] == "right_friction_wheel_joint")
+        {
+          right_friction_wheel_velocity_[0] = data->velocity[i];
+        }
+        judge_ = false;
+      }
+      else
+      {
+        if (data->name[i] == "left_friction_wheel_joint")
+        {
+          left_friction_wheel_velocity_[1] = data->velocity[i];
+        }
+        if (data->name[i] == "right_friction_wheel_joint")
+        {
+          right_friction_wheel_velocity_[1] = data->velocity[i];
+        }
+        judge_ = true;
+      }
+      if (std::abs(left_friction_wheel_velocity_[1] - left_friction_wheel_velocity_[0]) > 20 &&
+          std::abs(right_friction_wheel_velocity_[1] - right_friction_wheel_velocity_[0]) > 20)
+        is_shoot_ = true;
+      else
+        is_shoot_ = false;
+    }
+  }
+
+  void UpdateShooterCoolingHeat()
+  {
+    if (!referee_is_online_)
+      shooter_cooling_heat_ -= shooter_cooling_rate_ / 10;
+    ros::Rate loop_rate(10);
+    loop_rate.sleep();
+  }
+  
   void setStatusOfShooter(const rm_msgs::GameRobotStatus data)
   {
     if (type_ == "ID1_17MM")
@@ -178,7 +222,7 @@ public:
         default:
           return rm_msgs::ShootCmd::SPEED_10M_PER_SECOND;  // Safety speed
       }
-    return -1;  // TODO unsafe!
+    return -1;                                             // TODO unsafe!
   }
 
   int getCoolingLimit()
@@ -234,8 +278,11 @@ private:
   uint8_t state_{};
   std::string type_{};
   bool burst_flag_ = false;
+  bool judge_ = true;
+  bool is_shoot_ = false;
   double bullet_heat_, safe_shoot_frequency_{}, heat_coeff_{}, shoot_frequency_{}, low_shoot_frequency_{},
-      high_shoot_frequency_{}, burst_shoot_frequency_{}, minimal_shoot_frequency_{};
+      high_shoot_frequency_{}, burst_shoot_frequency_{}, minimal_shoot_frequency_{}, left_friction_wheel_velocity_[1],
+      right_friction_wheel_velocity_[1];
 
   bool referee_is_online_;
   int shooter_cooling_limit_, shooter_cooling_rate_, shooter_cooling_heat_, shooter_speed_limit_;
