@@ -122,7 +122,7 @@ public:
     ros::Rate loop_rate(10);
     loop_rate.sleep();
   }
-  
+
   void setStatusOfShooter(const rm_msgs::GameRobotStatus data)
   {
     if (type_ == "ID1_17MM")
@@ -142,6 +142,24 @@ public:
       shooter_cooling_limit_ = data.shooter_id_1_42_mm_cooling_limit;
       shooter_cooling_rate_ = data.shooter_id_1_42_mm_cooling_rate;
       shooter_speed_limit_ = data.shooter_id_1_42_mm_speed_limit;
+    }
+    if (!referee_is_online_)
+    {
+      if (type_ == "ID1_17MM")
+      {
+        if (is_shoot_)
+          shooter_cooling_heat_ += 10;
+      }
+      else if (type_ == "ID2_17MM")
+      {
+        if (is_shoot_)
+          shooter_cooling_heat_ += 10;
+      }
+      else if (type_ == "ID1_42MM")
+      {
+        if (is_shoot_)
+          shooter_cooling_heat_ += 100;
+      }
     }
   }
 
