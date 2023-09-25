@@ -2,9 +2,9 @@ std_msgs/Header header
 uint8 id
 bool tracking
 uint8 armors_num
-geometry_msgs/Point position
+geometry_msgs/Point target_pos
 float64 yaw
-geometry_msgs/Vector3 velocity
+geometry_msgs/Vector3 target_vel
 float64 v_yaw
 float64 radius_1
 float64 radius_2
