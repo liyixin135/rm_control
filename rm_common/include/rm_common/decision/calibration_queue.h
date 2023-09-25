@@ -47,43 +47,55 @@ class CalibrationService
 public:
   CalibrationService(XmlRpc::XmlRpcValue& rpc_value, ros::NodeHandle& nh)
   {
+    // 判断rpc_value是否有start_controllers，stop_controllers，query_services这三个成员
     ROS_ASSERT(rpc_value.hasMember("start_controllers"));
     ROS_ASSERT(rpc_value.hasMember("stop_controllers"));
     ROS_ASSERT(rpc_value.hasMember("services_name"));
+    // 判断rpc_value里start_controllers，stop_controllers，query_services类型type是否正确
     ROS_ASSERT(rpc_value["start_controllers"].getType() == XmlRpc::XmlRpcValue::TypeArray);
     ROS_ASSERT(rpc_value["stop_controllers"].getType() == XmlRpc::XmlRpcValue::TypeArray);
     ROS_ASSERT(rpc_value["services_name"].getType() == XmlRpc::XmlRpcValue::TypeArray);
+    // 将rpc_value里start_controllers，stop_controllers写入当前类的容器start_controllers，stop_controllers
     start_controllers = getControllersName(rpc_value["start_controllers"]);
     stop_controllers = getControllersName(rpc_value["stop_controllers"]);
+    // 将services_name写入当前类的容器query_services
     for (int i = 0; i < rpc_value["services_name"].size(); ++i)
     {
       query_services.push_back(new QueryCalibrationServiceCaller(nh, rpc_value["services_name"][i]));
     }
   }
+  // 定义初始化控制器默认为false
   void setCalibratedFalse()
   {
     for (auto& service : query_services)
       service->getService().response.is_calibrated = false;
   }
+  // 从服务读取is_calibrated真正的状态
   bool isCalibrated()
   {
+    // 进入时初始化is_calibrated为true
     bool is_calibrated = true;
     for (auto& service : query_services)
       is_calibrated &= service->isCalibrated();
     return is_calibrated;
   }
+  // 呼叫服务
   void callService()
   {
     for (auto& service : query_services)
       service->callService();
   }
+  // 创建三个容器，start_controllers，stop_controllers，query_services
   std::vector<std::string> start_controllers, stop_controllers;
   std::vector<QueryCalibrationServiceCaller*> query_services;
 
 private:
+  // 用容器controllers获取rpc_value内的控制器，并返回controllers
   static std::vector<std::string> getControllersName(XmlRpc::XmlRpcValue& rpc_value)
   {
+    // 定义容器controllers
     std::vector<std::string> controllers;
+    // 将rpc_value内的控制器写入容器controllers
     for (int i = 0; i < rpc_value.size(); ++i)
     {
       controllers.push_back(rpc_value[i]);
@@ -102,31 +114,43 @@ public:
     ros::NodeHandle nh_global;
     bool use_sim_time;
     nh_global.param("use_sim_time", use_sim_time, false);
+    // 如果rpc_value的type不是TypeArray，函数就结束（默认没有使用仿真）
     if (use_sim_time || rpc_value.getType() != XmlRpc::XmlRpcValue::TypeArray)
       return;
+    // 将每个校准控制器写入calibration_services_中（用了push_back函数）
     for (int i = 0; i < rpc_value.size(); ++i)
       calibration_services_.emplace_back(rpc_value[i], nh);
+    // 最后一个询问是ros实时时间
     last_query_ = ros::Time::now();
+    // 校准迭代等于校准服务的最后一个
     calibration_itr_ = calibration_services_.end();
     // Start with calibrated, you should use reset() to start calibration.
   }
+  // ite是迭代的意思，
   void reset()
   {
+    // 校准服务为空则结束
     if (calibration_services_.empty())
       return;
+    // 使用begin函数读取校准服务第一个校准服务
     calibration_itr_ = calibration_services_.begin();
     switched_ = false;
+    // 设置校准服务默认为false
     for (auto service : calibration_services_)
       service.setCalibratedFalse();
   }
   void update(const ros::Time& time, bool flip_controllers)
   {
+    // 如果校准服务为控，则结束
     if (calibration_services_.empty())
       return;
+    // 如果已完成校准，则结束
     if (isCalibrated())
       return;
+    // 如果开关开了
     if (switched_)
     {
+      // 如果校准迭代器已经校准
       if (calibration_itr_->isCalibrated())
       {
         if (flip_controllers)
@@ -162,24 +186,33 @@ public:
   }
   void stopController()
   {
+    // 如果校准服务为空，则结束
     if (calibration_services_.empty())
       return;
+    // 如果校准迭代不等于校准服务的最后一个 并且 开关是开着的
     if (calibration_itr_ != calibration_services_.end() && switched_)
+      // 关闭校准迭代指向的控制控制器
       controller_manager_.stopControllers(calibration_itr_->stop_controllers);
   }
   void stop()
   {
+    // 如歌开关开着
     if (switched_)
     {
+      // 校准迭代等于校准服务最后一个校准控制器服务
       calibration_itr_ = calibration_services_.end();
+      // 然后将开关关闭
       switched_ = false;
     }
   }
 
 private:
   ros::Time last_query_;
+  // 校准服务
   std::vector<CalibrationService> calibration_services_;
+  // 校准迭代器
   std::vector<CalibrationService>::iterator calibration_itr_;
+  // 控制器管理
   ControllerManager& controller_manager_;
   bool switched_;
 };
