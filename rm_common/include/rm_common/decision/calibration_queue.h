@@ -64,13 +64,13 @@ public:
       query_services.push_back(new QueryCalibrationServiceCaller(nh, rpc_value["services_name"][i]));
     }
   }
-  // 定义初始化控制器默认为false
+  // 设置is_calibrated为false
   void setCalibratedFalse()
   {
     for (auto& service : query_services)
       service->getService().response.is_calibrated = false;
   }
-  // 从服务读取is_calibrated真正的状态
+  // 读取is_calibrated
   bool isCalibrated()
   {
     // 进入时初始化is_calibrated为true
@@ -93,9 +93,7 @@ private:
   // 用容器controllers获取rpc_value内的控制器，并返回controllers
   static std::vector<std::string> getControllersName(XmlRpc::XmlRpcValue& rpc_value)
   {
-    // 定义容器controllers
     std::vector<std::string> controllers;
-    // 将rpc_value内的控制器写入容器controllers
     for (int i = 0; i < rpc_value.size(); ++i)
     {
       controllers.push_back(rpc_value[i]);
