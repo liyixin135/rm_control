@@ -3,7 +3,7 @@ uint8 id
 bool tracking #是否需要跟随
 uint8 armors_num #装甲板数量
 geometry_msgs/Point position #预测的车中心的位置
-float64 yaw #装甲板的朝向yaw
+float64 yaw #装甲板相对于我方机器人的朝向yaw
 geometry_msgs/Vector3 velocity #预测车中心的速度
 float64 v_yaw #装甲板转动的角速度
 float64 radius_1 #半径1
