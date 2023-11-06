@@ -8,7 +8,7 @@ geometry_msgs/Vector3 velocity #预测车中心的速度
 float64 v_yaw #装甲板转动的角速度
 float64 radius_1 #半径1
 float64 radius_2 #半径2
-float64 dz #装甲板距离车中心的距离
+float64 dz #相邻两块装甲板高度差
 float64 accel #加速度
 
 # target_pos=position
