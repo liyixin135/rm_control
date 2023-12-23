@@ -47,20 +47,21 @@ class CalibrationService
 public:
   CalibrationService(XmlRpc::XmlRpcValue& rpc_value, ros::NodeHandle& nh)
   {
-    // 判断rpc_value是否有start_controllers，stop_controllers，query_services这三个成员
+    // 利用rpc_value判断参数文件是否有start_controllers，stop_controllers，query_services这三个容器
     ROS_ASSERT(rpc_value.hasMember("start_controllers"));
     ROS_ASSERT(rpc_value.hasMember("stop_controllers"));
     ROS_ASSERT(rpc_value.hasMember("services_name"));
-    // 判断rpc_value里start_controllers，stop_controllers，query_services类型type是否正确
+    // 利用rpc_value判断start_controllers，stop_controllers，query_services类型的type是否正确
     ROS_ASSERT(rpc_value["start_controllers"].getType() == XmlRpc::XmlRpcValue::TypeArray);
     ROS_ASSERT(rpc_value["stop_controllers"].getType() == XmlRpc::XmlRpcValue::TypeArray);
     ROS_ASSERT(rpc_value["services_name"].getType() == XmlRpc::XmlRpcValue::TypeArray);
-    // 将rpc_value里start_controllers，stop_controllers写入当前类的容器start_controllers，stop_controllers
+    // 用定义在该文件的start_controllers，stop_controllers容器获取写入参数文件中的start_controllers，stop_controllers
     start_controllers = getControllersName(rpc_value["start_controllers"]);
     stop_controllers = getControllersName(rpc_value["stop_controllers"]);
-    // 将services_name写入当前类的容器query_services
+    // 前面都是获取参数
     for (int i = 0; i < rpc_value["services_name"].size(); ++i)
     {
+      // 用配置文件中获取的services_name构造QueryCalibrationServiceCaller，并放置到query_services中
       query_services.push_back(new QueryCalibrationServiceCaller(nh, rpc_value["services_name"][i]));
     }
   }
@@ -70,12 +71,12 @@ public:
     for (auto& service : query_services)
       service->getService().response.is_calibrated = false;
   }
-  // 读取is_calibrated
+  // 用于获取是否校准成功
   bool isCalibrated()
   {
-    // 进入时初始化is_calibrated为true
     bool is_calibrated = true;
     for (auto& service : query_services)
+      // service->isCalibrated()这个接口会得到校准是否成功，如果query_services中所有的服务都返回true，那么说明所有校准都成功，此时才返回true
       is_calibrated &= service->isCalibrated();
     return is_calibrated;
   }
@@ -85,7 +86,7 @@ public:
     for (auto& service : query_services)
       service->callService();
   }
-  // 创建三个容器，start_controllers，stop_controllers，query_services
+  // 创建三个容器，start_controllers，stop_controllers，query_services,<>内是数据类型
   std::vector<std::string> start_controllers, stop_controllers;
   std::vector<QueryCalibrationServiceCaller*> query_services;
 
@@ -108,32 +109,27 @@ public:
   explicit CalibrationQueue(XmlRpc::XmlRpcValue& rpc_value, ros::NodeHandle& nh, ControllerManager& controller_manager)
     : controller_manager_(controller_manager), switched_(false)
   {
-    // Don't calibration if using simulation
+    // Don't calibration if using simulation，如果是仿真就不校准
     ros::NodeHandle nh_global;
     bool use_sim_time;
     nh_global.param("use_sim_time", use_sim_time, false);
-    // 如果rpc_value的type不是TypeArray，函数就结束（默认没有使用仿真）
     if (use_sim_time || rpc_value.getType() != XmlRpc::XmlRpcValue::TypeArray)
       return;
-    // 将每个校准控制器写入calibration_services_中（用了push_back函数）
+    // 将每个校准控制器写入calibration_services_中（和push_back函数相似）
     for (int i = 0; i < rpc_value.size(); ++i)
       calibration_services_.emplace_back(rpc_value[i], nh);
     // 最后一个询问是ros实时时间
     last_query_ = ros::Time::now();
-    // 校准迭代等于校准服务的最后一个
     calibration_itr_ = calibration_services_.end();
     // Start with calibrated, you should use reset() to start calibration.
   }
-  // ite是迭代的意思，
+  // 每次调用reset，calibration_itr_会指向calibration_services_中的第一个
   void reset()
   {
-    // 校准服务为空则结束
     if (calibration_services_.empty())
       return;
-    // 使用begin函数读取校准服务第一个校准服务
     calibration_itr_ = calibration_services_.begin();
     switched_ = false;
-    // 设置校准服务默认为false
     for (auto service : calibration_services_)
       service.setCalibratedFalse();
   }
