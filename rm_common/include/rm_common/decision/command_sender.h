@@ -250,7 +250,7 @@ public:
     TimeStampCommandSenderBase<rm_msgs::ChassisCmd>::sendCommand(time);
   }
   void setZero() override{};
-  PowerLimit* power_limit_;
+  PowerLimit* power_limit_;  // 这是power_limit.h下的类指针，通过这个可以调用PowerLimit类下的函数
 
 private:
   LinearInterp accel_x_, accel_y_, accel_z_;
