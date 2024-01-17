@@ -78,7 +78,7 @@ public:
     TEST = 4,
   } Mode;
 
-  // 读到safety_power，更新safety power
+  // 传入safety_power，更新safety power_
   void updateSafetyPower(int safety_power)
   {
     if (safety_power > 0)
@@ -90,7 +90,7 @@ public:
   {
     expect_state_ = state;
   }
-  // 从裁判系统扒id和底盘功率限制
+  // 从裁判系统扒id和底盘功率上限
   void setGameRobotData(const rm_msgs::GameRobotStatus data)
   {
     robot_id_ = data.robot_id;
@@ -130,14 +130,14 @@ public:
       // standard and hero，我要看的领域
       if (referee_is_online_)  // 裁判系统在线
       {
-        if (capacity_is_online_)  // 超电在线，其实也是用裁判系统作为标志位
+        if (capacity_is_online_)  // 超电在线，其实也是用裁判系统读出来的超电时间戳作为标志位
         {
-          // 如果底盘功率限制大于burst模式下提供的功率，burst功率写死了，是220W，那么命令给的功率限制就是220
+          // 如果裁判系统功率上限大于burst模式下提供的功率，那么底盘命令的功率限制就等于burst（chassis_power_limit_这个是裁判系统读出来的
           if (chassis_power_limit_ > burst_power_)
             chassis_cmd.power_limit = burst_power_;
           else
           {
-            // 如果裁判系统和超电都在，但是底盘功率限制大于了burst的功率（一般不存在这种情况，选择模式进入
+            // 如果裁判系统和超电都在，但是裁判系统读出来的功率限制不足以让底盘进入burst，选择模式进入
             switch (cap_state_)  // cap_state_是从裁判系统扒出来的
             {
               case NORMAL:
@@ -155,17 +155,18 @@ public:
             }
           }
         }
-        // 裁判系统在线，但是超电不在，那用normal
-        else
+        else  // 裁判系统在线，但是超电不在，那用normal
           normal(chassis_cmd);
       }
-      // 如果裁判系统不在，那用safety_power_
+      // 如果裁判系统不在，直接命令定死，给底盘功率限制是60,这个是步兵最低等级的功率，绝对安全功率
       else
         chassis_cmd.power_limit = safety_power_;
     }
   }
 
 private:
+  // 以下都是裁判系统读出来的功率限制小于burst后选择进入的模式
+  // charge
   void charge(rm_msgs::ChassisCmd& chassis_cmd)
   {
     chassis_cmd.power_limit = chassis_power_limit_ * 0.70;
@@ -185,9 +186,10 @@ private:
   }
   void burst(rm_msgs::ChassisCmd& chassis_cmd, bool is_gyro)
   {
+    // 如果cap_energy_大于capacitor_threshold_（设置了一个最低限制，cap_energy_是从裁判系统读出来的超电能量
     if (cap_energy_ > capacitor_threshold_)
     {
-      if (is_gyro)
+      if (is_gyro)  // 小陀螺时直接加上extra_power_50,直接
         chassis_cmd.power_limit = chassis_power_limit_ + extra_power_;
       else
         chassis_cmd.power_limit = burst_power_;
