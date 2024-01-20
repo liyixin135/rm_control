@@ -372,6 +372,7 @@ public:
     if (((gimbal_des_error_.error > gimbal_error_tolerance_ && time - gimbal_des_error_.stamp < ros::Duration(0.1)) ||
          (track_data_.accel > target_acceleration_tolerance_)) ||
         (!suggest_fire_.data && armor_type_ == rm_msgs::StatusChangeRequest::ARMOR_OUTPOST_BASE))
+      // 找到armor_type_是谁给的，跳转setArmorType函数
       if (msg_.mode == rm_msgs::ShootCmd::PUSH)
         setMode(rm_msgs::ShootCmd::READY);
   }
@@ -437,6 +438,7 @@ public:
   }
   void setArmorType(uint8_t armor_type)
   {
+    // 看看谁在调用，跳转manual(shooter
     armor_type_ = armor_type;
   }
   void setShootFrequency(uint8_t mode)
