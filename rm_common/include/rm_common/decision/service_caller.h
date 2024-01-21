@@ -228,6 +228,7 @@ public:
   void setArmorTargetType(uint8_t armor_target)
   {
     service_.request.armor_target = armor_target;
+    // 跳转谁在调用setArmorTargetType
   }
   void switchExposureLevel()
   {
@@ -246,6 +247,7 @@ public:
   int getArmorTarget()
   {
     return service_.request.armor_target;
+    // 直接return的armor_target，找找service_.request.armor_target它谁给的，跳转setArmorTargetType
   }
   uint8_t getExposureLevel()
   {
