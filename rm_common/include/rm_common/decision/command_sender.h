@@ -71,6 +71,7 @@ template <class MsgType>
 class CommandSenderBase
 {
 public:
+  // 获得topic，定义了一个pub_
   explicit CommandSenderBase(ros::NodeHandle& nh)
   {
     if (!nh.getParam("topic", topic_))
@@ -80,9 +81,11 @@ public:
   }
   void setMode(int mode)
   {
+    // 当MsgType既不是geometry_msgs::Twist又不是std_msgs::Float64，msg.mode才会等于mode
     if (!std::is_same<MsgType, geometry_msgs::Twist>::value && !std::is_same<MsgType, std_msgs::Float64>::value)
       msg_.mode = mode;
   }
+  // 把话题发布出去，本质就是发送命令
   virtual void sendCommand(const ros::Time& time)
   {
     pub_.publish(msg_);
@@ -100,6 +103,7 @@ public:
   {
   }
   virtual void setZero() = 0;
+  // 直接return msg
   MsgType* getMsg()
   {
     return &msg_;
@@ -133,6 +137,8 @@ public:
   explicit HeaderStampCommandSenderBase(ros::NodeHandle& nh) : CommandSenderBase<MsgType>(nh)
   {
   }
+  // 重写父类CommandSenderBase的sendCommand函数，该函数用ros_time更新msg的时间戳，调用基类的 sendCommand 函数，将时间
+  // time 传递给它，实际上执行了命令消息的发布操作
   void sendCommand(const ros::Time& time) override
   {
     CommandSenderBase<MsgType>::msg_.header.stamp = time;
@@ -145,6 +151,7 @@ class Vel2DCommandSender : public CommandSenderBase<geometry_msgs::Twist>
 public:
   explicit Vel2DCommandSender(ros::NodeHandle& nh) : CommandSenderBase<geometry_msgs::Twist>(nh)
   {
+    // 利用rpc拿参
     XmlRpc::XmlRpcValue xml_rpc_value;
     if (!nh.getParam("max_linear_x", xml_rpc_value))
       ROS_ERROR("Max X linear velocity no defined (namespace: %s)", nh.getNamespace().c_str());
