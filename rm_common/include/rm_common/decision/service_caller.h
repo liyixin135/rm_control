@@ -205,19 +205,19 @@ public:
     else
       ROS_INFO_STREAM("Set enemy color failed: referee offline");
   }
-  void setColor(uint8_t color)
+  void setColor(uint8_t color)  // 调用函数传入color
   {
     service_.request.color = color;
   }
-  void switchEnemyColor()
+  void switchEnemyColor()  // color取反
   {
     service_.request.color = service_.request.color == rm_msgs::StatusChangeRequest::RED;
   }
-  void switchTargetType()
+  void switchTargetType()  // target取反
   {
     service_.request.target = service_.request.target == rm_msgs::StatusChangeRequest::ARMOR;
   }
-  void setTargetType(uint8_t target)
+  void setTargetType(uint8_t target)  // 调用函数传入target
   {
     service_.request.target = target;
   }
