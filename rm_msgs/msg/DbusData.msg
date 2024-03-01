@@ -1,6 +1,6 @@
-uint8 UP = 1
-uint8 DOWN = 2
-uint8 MID = 3
+uint8 UP = 1 #上拨
+uint8 DOWN = 2#下拨
+uint8 MID = 3#中拨
 
 float64 ch_l_x
 float64 ch_l_y
@@ -11,11 +11,11 @@ uint8 s_l
 uint8 s_r
 float64 wheel
 #mouse
-float64 m_x
+float64 m_x#前三个感觉是挪动
 float64 m_y
 float64 m_z
-bool p_l
-bool p_r
+bool p_l#左键
+bool p_r#右键
 #key board
 bool key_w
 bool key_s
