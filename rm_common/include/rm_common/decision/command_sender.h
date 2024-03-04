@@ -297,7 +297,7 @@ public:
     msg_.rate_yaw = 0.;
     msg_.rate_pitch = 0.;
   }
-  void setBulletSpeed(double bullet_speed)
+  void setBulletSpeed(double bullet_speed)  // 设置bullet_speed
   {
     msg_.bullet_speed = bullet_speed;
   }
@@ -389,7 +389,7 @@ public:
     msg_.hz = heat_limit_->getShootFrequency();
     TimeStampCommandSenderBase<rm_msgs::ShootCmd>::sendCommand(time);
   }
-  double getSpeed()
+  double getSpeed()  // 先进入setSpeedDesAndWheelSpeedDes()函数
   {
     setSpeedDesAndWheelSpeedDes();
     return speed_des_;
@@ -399,7 +399,7 @@ public:
     setSpeedDesAndWheelSpeedDes();
     return wheel_speed_des_ + total_extra_wheel_speed_;
   }
-  void setSpeedDesAndWheelSpeedDes()
+  void setSpeedDesAndWheelSpeedDes()  // 在此speed_des_等于manual的config文件直接读取
   {
     switch (heat_limit_->getSpeedLimit())
     {
