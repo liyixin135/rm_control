@@ -11,11 +11,11 @@ uint8 s_l
 uint8 s_r
 float64 wheel
 #mouse
-float64 m_x#前三个感觉是挪动
+float64 m_x
 float64 m_y
-float64 m_z
-bool p_l#左键
-bool p_r#右键
+float64 m_z#鼠标中键
+bool p_l
+bool p_r
 #key board
 bool key_w
 bool key_s
