@@ -373,10 +373,10 @@ public:
   }
   void checkError(const ros::Time& time)
   {
-    if ((((gimbal_des_error_.error > gimbal_error_tolerance_ || (allow_shoot_.error == 0.)) &&
-          time - gimbal_des_error_.stamp < ros::Duration(0.1)) ||
-         (track_data_.accel > target_acceleration_tolerance_)) ||
-        (!suggest_fire_.data && armor_type_ == rm_msgs::StatusChangeRequest::ARMOR_OUTPOST_BASE))
+    if ((((gimbal_des_error_.error > gimbal_error_tolerance_ && time - gimbal_des_error_.stamp < ros::Duration(0.1)) ||
+          (track_data_.accel > target_acceleration_tolerance_)) ||
+         (!suggest_fire_.data && armor_type_ == rm_msgs::StatusChangeRequest::ARMOR_OUTPOST_BASE)) ||
+        (allow_shoot_.error == 0. && time - allow_shoot_.stamp < ros::Duration(0.1)))
       if (msg_.mode == rm_msgs::ShootCmd::PUSH)
         setMode(rm_msgs::ShootCmd::READY);
   }
