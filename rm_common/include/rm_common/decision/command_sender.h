@@ -359,6 +359,10 @@ public:
   {
     gimbal_des_error_ = error;
   }
+  void updateAllowShoot(const rm_msgs::GimbalDesError& data)
+  {
+    allow_shoot_ = data;
+  }
   void updateTrackData(const rm_msgs::TrackData& data)
   {
     track_data_ = data;
@@ -369,7 +373,8 @@ public:
   }
   void checkError(const ros::Time& time)
   {
-    if (((gimbal_des_error_.error > gimbal_error_tolerance_ && time - gimbal_des_error_.stamp < ros::Duration(0.1)) ||
+    if ((((gimbal_des_error_.error > gimbal_error_tolerance_ || (allow_shoot_.error == 0.)) &&
+          time - gimbal_des_error_.stamp < ros::Duration(0.1)) ||
          (track_data_.accel > target_acceleration_tolerance_)) ||
         (!suggest_fire_.data && armor_type_ == rm_msgs::StatusChangeRequest::ARMOR_OUTPOST_BASE))
       if (msg_.mode == rm_msgs::ShootCmd::PUSH)
@@ -458,6 +463,7 @@ private:
   double target_acceleration_tolerance_{};
   double extra_wheel_speed_once_{};
   double total_extra_wheel_speed_{};
+  rm_msgs::GimbalDesError allow_shoot_;
   rm_msgs::TrackData track_data_;
   rm_msgs::GimbalDesError gimbal_des_error_;
   std_msgs::Bool suggest_fire_;
