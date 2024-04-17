@@ -222,12 +222,13 @@ public:
   {
     return x1;
   }
+
   T getX2() const
   {
     return x2;
   }
 
 private:
-  T r, h;    // 控制参数
-  T x1, x2;  // 状态变量
+  T r, h;
+  T x1, x2;
 };
