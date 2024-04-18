@@ -204,31 +204,35 @@ template <typename T>
 class NonlinearTrackingDifferentiator
 {
 public:
-  NonlinearTrackingDifferentiator(T r, T h) : r(r), h(h), x1(0.), x2(0.)
+  NonlinearTrackingDifferentiator(T r, T h) : r_(r), h_(h), x1_(0.), x2_(0.)
   {
   }
-
+  void clear()
+  {
+    x1_ = 0.;
+    x2_ = 0.;
+  }
   void update(T v)
   {
-    T y = x1 - v + h * x2;
-    T a0 = sqrt(h * h * r * r + 4 * r * fabs(y));
-    T a = x2 + 0.5 * (a0 - h * r) * (y > 0 ? 1 : -1);
-    T u = fabs(a) > h * r ? -r * (a > 0 ? 1 : -1) : -r * a / (h * r);
-    x1 = x1 + h * x2;
-    x2 = x2 + h * u;
+    T y = x1_ - v + h_ * x2_;
+    T a0 = sqrt(h_ * h_ * r_ * r_ + 4 * r_ * fabs(y));
+    T a = x2_ + 0.5 * (a0 - h_ * r_) * (y > 0 ? 1 : -1);
+    T u = fabs(a) > h_ * r_ ? -r_ * (a > 0 ? 1 : -1) : -r_ * a / (h_ * r_);
+    x1_ = x1_ + h_ * x2_;
+    x2_ = x2_ + h_ * u;
   }
 
   T getX1() const
   {
-    return x1;
+    return x1_;
   }
 
   T getX2() const
   {
-    return x2;
+    return x2_;
   }
 
 private:
-  T r, h;
-  T x1, x2;
+  T r_, h_;
+  T x1_, x2_;
 };
