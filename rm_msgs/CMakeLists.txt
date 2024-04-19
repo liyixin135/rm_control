@@ -7,7 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
         geometry_msgs
         actionlib
         actionlib_msgs
-        )
+)
 
 add_message_files(
         FILES
@@ -19,6 +19,7 @@ add_message_files(
         ShootState.msg
         GimbalCmd.msg
         GimbalDesError.msg
+        GimbalPosState.msg
         LpData.msg
         KalmanData.msg
         MovingAverageData.msg
