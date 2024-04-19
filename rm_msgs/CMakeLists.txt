@@ -17,6 +17,7 @@ add_message_files(
         ChassisCmd.msg
         ShootCmd.msg
         ShootState.msg
+        ShootBeforehandCmd.msg
         GimbalCmd.msg
         GimbalDesError.msg
         GimbalPosState.msg
