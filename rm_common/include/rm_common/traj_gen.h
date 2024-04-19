@@ -204,13 +204,13 @@ template <typename T>
 class NonlinearTrackingDifferentiator
 {
 public:
-  NonlinearTrackingDifferentiator(T r, T h) : r_(r), h_(h), x1_(0.), x2_(0.)
+  NonlinearTrackingDifferentiator(T r, T h) : r_(r), h_(h)
   {
   }
-  void clear()
+  void clear(T x1, T x2)
   {
-    x1_ = 0.;
-    x2_ = 0.;
+    x1_ = x1;
+    x2_ = x2;
   }
   void update(T v)
   {
@@ -233,6 +233,6 @@ public:
   }
 
 private:
-  T r_, h_;
-  T x1_, x2_;
+  T r_{}, h_{};
+  T x1_{}, x2_{};
 };
