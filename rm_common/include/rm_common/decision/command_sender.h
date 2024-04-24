@@ -71,7 +71,6 @@ template <class MsgType>
 class CommandSenderBase
 {
 public:
-  // 获得topic，定义了一个pub_
   explicit CommandSenderBase(ros::NodeHandle& nh)
   {
     if (!nh.getParam("topic", topic_))
@@ -81,11 +80,9 @@ public:
   }
   void setMode(int mode)
   {
-    // 当MsgType既不是geometry_msgs::Twist又不是std_msgs::Float64，msg.mode才会等于mode
     if (!std::is_same<MsgType, geometry_msgs::Twist>::value && !std::is_same<MsgType, std_msgs::Float64>::value)
       msg_.mode = mode;
   }
-  // 把话题发布出去，本质就是发送命令
   virtual void sendCommand(const ros::Time& time)
   {
     pub_.publish(msg_);
@@ -103,7 +100,6 @@ public:
   {
   }
   virtual void setZero() = 0;
-  // 直接return msg
   MsgType* getMsg()
   {
     return &msg_;
@@ -137,8 +133,6 @@ public:
   explicit HeaderStampCommandSenderBase(ros::NodeHandle& nh) : CommandSenderBase<MsgType>(nh)
   {
   }
-  // 重写父类CommandSenderBase的sendCommand函数，该函数用ros_time更新msg的时间戳，调用基类的 sendCommand 函数，将时间
-  // time 传递给它，实际上执行了命令消息的发布操作
   void sendCommand(const ros::Time& time) override
   {
     CommandSenderBase<MsgType>::msg_.header.stamp = time;
@@ -151,7 +145,6 @@ class Vel2DCommandSender : public CommandSenderBase<geometry_msgs::Twist>
 public:
   explicit Vel2DCommandSender(ros::NodeHandle& nh) : CommandSenderBase<geometry_msgs::Twist>(nh)
   {
-    // 利用rpc拿参
     XmlRpc::XmlRpcValue xml_rpc_value;
     if (!nh.getParam("max_linear_x", xml_rpc_value))
       ROS_ERROR("Max X linear velocity no defined (namespace: %s)", nh.getNamespace().c_str());
@@ -257,7 +250,7 @@ public:
     TimeStampCommandSenderBase<rm_msgs::ChassisCmd>::sendCommand(time);
   }
   void setZero() override{};
-  PowerLimit* power_limit_;  // 这是power_limit.h下的类指针，通过这个可以调用PowerLimit类下的函数
+  PowerLimit* power_limit_;
 
 private:
   LinearInterp accel_x_, accel_y_, accel_z_;
@@ -297,7 +290,7 @@ public:
     msg_.rate_yaw = 0.;
     msg_.rate_pitch = 0.;
   }
-  void setBulletSpeed(double bullet_speed)  // 设置bullet_speed
+  void setBulletSpeed(double bullet_speed)
   {
     msg_.bullet_speed = bullet_speed;
   }
@@ -366,6 +359,10 @@ public:
   {
     gimbal_des_error_ = error;
   }
+  void updateAllowShoot(const rm_msgs::GimbalDesError& data)
+  {
+    allow_shoot_ = data;
+  }
   void updateTrackData(const rm_msgs::TrackData& data)
   {
     track_data_ = data;
@@ -376,10 +373,10 @@ public:
   }
   void checkError(const ros::Time& time)
   {
-    if (((gimbal_des_error_.error > gimbal_error_tolerance_ && time - gimbal_des_error_.stamp < ros::Duration(0.1)) ||
-         (track_data_.accel > target_acceleration_tolerance_)) ||
-        (!suggest_fire_.data && armor_type_ == rm_msgs::StatusChangeRequest::ARMOR_OUTPOST_BASE))//按e键进入前哨站模式
-      // 找到armor_type_是谁给的，跳转setArmorType函数
+    if ((((gimbal_des_error_.error > gimbal_error_tolerance_ && time - gimbal_des_error_.stamp < ros::Duration(0.1)) ||
+          (track_data_.accel > target_acceleration_tolerance_)) ||
+         (!suggest_fire_.data && armor_type_ == rm_msgs::StatusChangeRequest::ARMOR_OUTPOST_BASE)) ||
+        (allow_shoot_.error == 0. && time - allow_shoot_.stamp < ros::Duration(0.1)))
       if (msg_.mode == rm_msgs::ShootCmd::PUSH)
         setMode(rm_msgs::ShootCmd::READY);
   }
@@ -389,7 +386,7 @@ public:
     msg_.hz = heat_limit_->getShootFrequency();
     TimeStampCommandSenderBase<rm_msgs::ShootCmd>::sendCommand(time);
   }
-  double getSpeed()  // 先进入setSpeedDesAndWheelSpeedDes()函数
+  double getSpeed()
   {
     setSpeedDesAndWheelSpeedDes();
     return speed_des_;
@@ -399,7 +396,7 @@ public:
     setSpeedDesAndWheelSpeedDes();
     return wheel_speed_des_ + total_extra_wheel_speed_;
   }
-  void setSpeedDesAndWheelSpeedDes()  // 在此speed_des_等于manual的config文件直接读取
+  void setSpeedDesAndWheelSpeedDes()
   {
     switch (heat_limit_->getSpeedLimit())
     {
@@ -445,7 +442,6 @@ public:
   }
   void setArmorType(uint8_t armor_type)
   {
-    // 看看谁在调用，跳转manual(shooter
     armor_type_ = armor_type;
   }
   void setShootFrequency(uint8_t mode)
@@ -468,7 +464,7 @@ private:
   double extra_wheel_speed_once_{};
   double total_extra_wheel_speed_{};
   rm_msgs::TrackData track_data_;
-  rm_msgs::GimbalDesError gimbal_des_error_;
+  rm_msgs::GimbalDesError gimbal_des_error_, allow_shoot_;
   std_msgs::Bool suggest_fire_;
   uint8_t armor_type_{};
 };
