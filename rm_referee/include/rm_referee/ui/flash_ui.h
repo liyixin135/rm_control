@@ -48,4 +48,20 @@ private:
   void display(const ros::Time& time) override;
   uint8_t chassis_mode_;
 };
+
+class HeroHitFlashUi : public FlashUi
+{
+public:
+  explicit HeroHitFlashUi(XmlRpc::XmlRpcValue& rpc_value, Base& base, std::deque<Graph>* graph_queue,
+                          std::deque<Graph>* character_queue)
+    : FlashUi(rpc_value, base, " hero_hit", graph_queue, character_queue)
+  {
+  }
+  void updateHittingConfig(const rm_msgs::GameRobotHp& msg);
+
+private:
+  void display(const ros::Time& time) override;
+  bool hitted_;
+  rm_msgs::GameRobotHp last_hp_msg_;
+};
 }  // namespace rm_referee

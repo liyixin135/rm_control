@@ -45,6 +45,7 @@ add_service_files(
 add_message_files(
         DIRECTORY msg/detection
         FILES
+        PriorityArray.msg
         TargetDetection.msg
         TargetDetectionArray.msg
         TrackData.msg
@@ -78,6 +79,10 @@ add_message_files(
         ClientMapSendData.msg
         ClientMapReceiveData.msg
         MapSentryData.msg
+        GameRobotPosData.msg
+        SentryInfo.msg
+        RadarInfo.msg
+        Buff.msg
         PowerManagementSampleAndStatusData.msg
         PowerManagementInitializationExceptionData.msg
         PowerManagementProcessStackOverflowData.msg
