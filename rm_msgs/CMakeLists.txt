@@ -7,18 +7,21 @@ find_package(catkin REQUIRED COMPONENTS
         geometry_msgs
         actionlib
         actionlib_msgs
-        )
+)
 
 add_message_files(
         FILES
         ActuatorState.msg
         BalanceState.msg
         DbusData.msg
+        ExchangerMsg.msg
         ChassisCmd.msg
         ShootCmd.msg
         ShootState.msg
+        ShootBeforehandCmd.msg
         GimbalCmd.msg
         GimbalDesError.msg
+        GimbalPosState.msg
         LpData.msg
         KalmanData.msg
         MovingAverageData.msg
@@ -65,7 +68,7 @@ add_message_files(
         SupplyProjectileAction.msg
         DartRemainingTime.msg
         RobotHurt.msg
-        CurrentSentryPosData.msg
+        SentryAttackingTarget.msg
         ShootData.msg
         BulletAllowance.msg
         RfidStatus.msg
@@ -81,6 +84,7 @@ add_message_files(
         SentryInfo.msg
         RadarInfo.msg
         Buff.msg
+        RadarToSentry.msg
         PowerManagementSampleAndStatusData.msg
         PowerManagementInitializationExceptionData.msg
         PowerManagementProcessStackOverflowData.msg

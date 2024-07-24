@@ -238,4 +238,18 @@ private:
   void update() override;
   std::string data_;
 };
+
+class FrictionSpeedTriggerChangeUi : public TriggerChangeUi
+{
+public:
+  explicit FrictionSpeedTriggerChangeUi(XmlRpc::XmlRpcValue& rpc_value, Base& base, std::deque<Graph>* graph_queue,
+                                        std::deque<Graph>* character_queue)
+    : TriggerChangeUi(rpc_value, base, "friction_speed", graph_queue, character_queue){};
+  void updateFrictionSpeedUiData(const rm_msgs::ShootCmdConstPtr& data);
+
+private:
+  void update() override;
+  double wheel_speed_;
+};
+
 }  // namespace rm_referee
