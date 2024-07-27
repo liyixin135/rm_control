@@ -140,9 +140,15 @@ public:
     else if (shooter_cooling_limit_ - shooter_cooling_heat == bullet_heat_)
       return shooter_cooling_rate_ / bullet_heat_;
     else if (shooter_cooling_limit_ - shooter_cooling_heat <= bullet_heat_ * heat_coeff_)
-      return (shooter_cooling_limit_ - shooter_cooling_heat) / (bullet_heat_ * heat_coeff_) *
-                 (shoot_frequency_ - shooter_cooling_rate_ / bullet_heat_) +
-             shooter_cooling_rate_ / bullet_heat_;
+      if (use_local_heat_)
+        return (shooter_cooling_limit_ - shooter_cooling_heat) / shooter_cooling_limit_ *
+                   (shooter_cooling_limit_ - shooter_cooling_heat) / shooter_cooling_limit_ *
+                   (shoot_frequency_ - shooter_cooling_rate_ / bullet_heat_) +
+               shooter_cooling_rate_ / bullet_heat_ + 1.0;
+      else
+        return (shooter_cooling_limit_ - shooter_cooling_heat) / (bullet_heat_ * heat_coeff_) *
+                   (shoot_frequency_ - shooter_cooling_rate_ / bullet_heat_) +
+               shooter_cooling_rate_ / bullet_heat_;
     else
       return shoot_frequency_;
   }
