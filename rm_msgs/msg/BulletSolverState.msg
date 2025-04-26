@@ -1,2 +1,3 @@
 float64 fly_time
 uint8 current_armor
+uint8 switch_armor_state
